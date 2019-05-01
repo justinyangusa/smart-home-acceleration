@@ -15,8 +15,9 @@ PAGE="""\
 <title>Raspberry Pi - Surveillance Camera</title>
 </head>
 <body>
-<center><h1>Raspberry Pi - Surveillance Camera</h1></center>
+<center><h1>Raspberry Pi &ndash; Surveillance Camera</h1></center>
 <center><img src="stream.mjpg" width="640" height="480"></center>
+<center><h3>Hi, Ashutosh!</h3></center>
 </body>
 </html>
 """
@@ -29,8 +30,7 @@ class StreamingOutput(object):
 
     def write(self, buf):
         if buf.startswith(b'\xff\xd8'):
-            # New frame, copy the existing buffer's content and notify 
-all
+            # New frame, copy the existing buffer's content and notify all
             # clients it's available
             self.buffer.truncate()
             with self.condition:
@@ -57,8 +57,7 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
             self.send_header('Age', 0)
             self.send_header('Cache-Control', 'no-cache, private')
             self.send_header('Pragma', 'no-cache')
-            self.send_header('Content-Type', 'multipart/x-mixed-replace; 
-boundary=FRAME')
+            self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=FRAME')
             self.end_headers()
             try:
                 while True:
@@ -85,9 +84,8 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
 
 with picamera.PiCamera(resolution='640x480', framerate=24) as camera:
     output = StreamingOutput()
-    #Uncomment the next line to change your Pi's Camera rotation (in 
-degrees)
-    #camera.rotation = 90
+    #Uncomment the next line to change your Pi's Camera rotation (in degrees)
+    camera.rotation = 180
     camera.start_recording(output, format='mjpeg')
     try:
         address = ('', 8000)
