@@ -1,37 +1,62 @@
-#HenHao
 import RPi.GPIO as GPIO
 import time
 
-GPIO.cleanup()
+"""
+    Ultrasonic Main function. Calls init, and then loops forever.
+    Might need modifications to update the flag variable
+"""
+def ultrasonic(flag):
+    TRIG, ECHO = ultrasonic_init()
 
-GPIO.setmode(GPIO.BCM)
+    # Modify these conditions to update flag variable correctly
+    while True:
+        dist = get_distance(TRIG, ECHO)
+        flag = is_close(dist)   # Set flag
+        time.sleep(0.2)
 
-TRIG = 23
-ECHO = 24
+    ultrasonic_done()
 
-GPIO.setup(TRIG, GPIO.OUT)
-GPIO.setup(ECHO, GPIO.IN)
 
-GPIO.output(TRIG, False)
-time.sleep(2)
 
-for i in range(50):
+def ultrasonic_init():
+    GPIO.setmode(GPIO.BCM)
+
+    TRIG = 23
+    ECHO = 24
+
+    GPIO.setup(TRIG, GPIO.OUT)
+    GPIO.setup(ECHO, GPIO.IN)
+
+    GPIO.output(TRIG, False)
+    # time.sleep(2)
+    return TRIG, ECHO
+
+def get_distance(TRIG, ECHO):
     GPIO.output(TRIG, True)
-    time.sleep(0.01)
+    time.sleep(0.01)    # 10ms
     GPIO.output(TRIG, False)
 
-    print("Triggered")
-    while GPIO.input(ECHO)==0:
-        pulse_start = time.time()
-    print("Echoed")
-    while GPIO.input(ECHO)==1:
-        pulse_end = time.time()
+    while (GPIO.input(ECHO) == 0):
+        # No response so just wait and do nothing
+        # start = time.time()
+    start = time.time()
+    while (GPIO.input(ECHO) == 1):
+        # Just wait and time the signal
+        # end = time.time()
+    end = time.time()
 
-    pulse_duration = pulse_end - pulse_start
-    distance = pulse_duration * 17150
-    distance = round(distance, 2)
-    print("Distance:",distance,"cm")
+    t = end - start
+    distance = t * 17150    # 343 m/s -> 171.5 m/s
+    distance = int(distance) # round
+    print("Distance:", distance,"cm")
 
-    time.sleep(2)
+    return distance
 
-GPIO.cleanup()
+def is_close(distance):
+    if (distance < 120):
+        return True
+    else:
+        return False
+
+def ultrasonic_done():
+    GPIO.cleanup()
